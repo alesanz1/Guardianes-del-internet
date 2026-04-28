@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guardianes del Internet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  min-height:100vh;
+  background:#060e1c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.gw{
+  width:100%;
+  max-width:600px;
+  background:#0a1628;
+  border-radius:20px;
+  overflow:hidden;
+  position:relative;
+  border:1px solid rgba(55,138,221,0.3);
+}
+canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.content{position:relative;z-index:2;padding:24px 28px 32px}
+
+.header{text-align:center;padding:10px 0 18px}
+.logo-ring{
+  width:70px;height:70px;border-radius:50%;
+  background:#0f2040;
+  border:2px solid #378ADD;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;font-size:32px;
+}
+.game-title{font-size:26px;font-weight:700;color:#E6F1FB;letter-spacing:.3px;margin-bottom:4px}
+.game-sub{font-size:14px;color:#85B7EB}
+
+.hud{
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,22,40,0.8);
+  border:1px solid rgba(55,138,221,0.3);
+  border-radius:14px;padding:12px 20px;margin-bottom:16px;
+}
+.hud-item{text-align:center}
+.hud-label{font-size:11px;color:#85B7EB;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.hud-val{font-size:20px;font-weight:700;color:#E6F1FB}
+
+.prog-wrap{margin-bottom:16px}
+.prog-track{height:8px;background:rgba(55,138,221,0.15);border-radius:99px;overflow:hidden;border:1px solid rgba(55,138,221,0.2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1D9E75,#378ADD);border-radius:99px;transition:width .5s ease}
+
+.round-hint{font-size:12px;color:#5DCAA5;text-align:center;margin-bottom:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase}
+
+.card{
+  background:rgba(12,25,50,0.9);
+  border:1px solid rgba(55,138,221,0.35);
+  border-radius:16px;padding:24px 20px 20px;
+}
+.scene-icon{font-size:48px;text-align:center;margin-bottom:14px}
+.scene-q{
+  font-size:16px;color:#B5D4F4;line-height:1.7;
+  text-align:center;min-height:56px;margin-bottom:20px;
+}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{
+  padding:13px 12px;
+  font-size:13px;font-weight:600;
+  color:#B5D4F4;
+  background:rgba(55,138,221,0.1);
+  border:1px solid rgba(55,138,221,0.3);
+  border-radius:12px;cursor:pointer;
+  line-height:1.4;text-align:center;
+  transition:background .15s,border-color .15s,transform .1s;
+  font-family:inherit;
+}
+.opt:hover{background:rgba(55,138,221,0.25);border-color:rgba(55,138,221,0.7);transform:translateY(-1px)}
+.opt:active{transform:scale(0.97)}
+.opt.correct{background:rgba(29,158,117,0.3);border-color:#1D9E75;color:#9FE1CB}
+.opt.wrong{background:rgba(226,75,74,0.2);border-color:#E24B4A;color:#F7C1C1}
+.opt.dim{pointer-events:none;opacity:.35}
+
+.fb{margin-top:16px;padding:13px 16px;border-radius:12px;font-size:13px;line-height:1.6;display:none}
+.fb.show{display:block}
+.fb.ok{background:rgba(29,158,117,0.2);border:1px solid rgba(29,158,117,0.5);color:#9FE1CB}
+.fb.bad{background:rgba(226,75,74,0.15);border:1px solid rgba(226,75,74,0.4);color:#F7C1C1}
+.fb-title{font-weight:700;margin-bottom:4px;font-size:14px}
+
+.nxt{
+  display:none;width:100%;margin-top:14px;
+  padding:13px;font-size:15px;font-weight:600;
+  color:#E6F1FB;
+  background:linear-gradient(135deg,rgba(55,138,221,0.25),rgba(29,158,117,0.2));
+  border:1px solid rgba(55,138,221,0.5);
+  border-radius:12px;cursor:pointer;
+  transition:background .15s,transform .1s;
+  font-family:inherit;
+}
+.nxt.show{display:block}
+.nxt:hover{background:linear-gradient(135deg,rgba(55,138,221,0.4),rgba(29,158,117,0.3));transform:translateY(-1px)}
+
+.end{display:none;text-align:center;padding:20px 10px 10px}
+.end.show{display:block}
+.end-icon{font-size:64px;margin-bottom:14px}
+.end-msg{font-size:22px;font-weight:700;color:#E6F1FB;margin-bottom:10px}
+.end-sub{font-size:14px;color:#85B7EB;line-height:1.8;margin-bottom:18px;white-space:pre-line}
+.medals{font-size:34px;margin-bottom:20px;letter-spacing:8px}
+.score-final{font-size:18px;color:#5DCAA5;margin-bottom:20px;font-weight:600}
+.rst{
+  padding:13px 36px;font-size:15px;font-weight:600;
+  color:#E6F1FB;
+  background:linear-gradient(135deg,rgba(55,138,221,0.3),rgba(29,158,117,0.25));
+  border:1px solid rgba(55,138,221,0.5);
+  border-radius:12px;cursor:pointer;font-family:inherit;
+  transition:background .15s,transform .1s;
+}
+.rst:hover{background:linear-gradient(135deg,rgba(55,138,221,0.45),rgba(29,158,117,0.4));transform:translateY(-1px)}
+
+.footer{text-align:center;margin-top:20px;font-size:11px;color:rgba(133,183,235,0.4);letter-spacing:.3px}
+</style>
+</head>
+<body>
+
+<div class="gw" id="gw">
+  <canvas class="bg" id="bgc"></canvas>
+  <div class="content">
+
+    <div class="header">
+      <div class="logo-ring">🛡️</div>
+      <div class="game-title">Guardianes del Internet</div>
+      <div class="game-sub">Institución Educativa La Pradera &nbsp;·&nbsp; 3° y 4° Primaria</div>
+    </div>
+
+    <div class="hud">
+      <div class="hud-item"><div class="hud-label">Puntos</div><div class="hud-val" id="score">0</div></div>
+      <div class="hud-item"><div class="hud-label">Pregunta</div><div class="hud-val" id="qnum">1 / 8</div></div>
+      <div class="hud-item"><div class="hud-label">Vidas</div><div class="hud-val" id="lives">❤️❤️❤️</div></div>
+    </div>
+
+    <div class="prog-wrap">
+      <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    </div>
+
+    <div id="game-area">
+      <div class="round-hint" id="hint">¿Cuál es la mejor decisión?</div>
+      <div class="card">
+        <div class="scene-icon" id="icon"></div>
+        <div class="scene-q" id="qtxt"></div>
+        <div class="opts" id="opts"></div>
+        <div class="fb" id="fb">
+          <div class="fb-title" id="fb-title"></div>
+          <div id="fb-body"></div>
+        </div>
+        <button class="nxt" id="nxt">Siguiente pregunta →</button>
+      </div>
+    </div>
+
+    <div class="end" id="end">
+      <div class="end-icon" id="e-icon"></div>
+      <div class="end-msg" id="e-msg"></div>
+      <div class="end-sub" id="e-sub"></div>
+      <div class="medals" id="e-medals"></div>
+      <div class="score-final" id="e-score"></div>
+      <button class="rst" onclick="restart()">Jugar de nuevo</button>
+    </div>
+
+    <div class="footer">Recurso Educativo Digital · Ciberseguridad para Niños</div>
+  </div>
+</div>
+
+<script>
+const Qs=[
+  {icon:"💬",q:"Alguien que no conoces te escribe en un juego en línea y te pide tu número de teléfono y la dirección de tu casa. ¿Qué haces?",opts:["Le doy mis datos porque parece simpático","No le doy nada y aviso a un adulto","Le doy solo mi nombre","Le envío una foto mía"],c:1,ok:"¡Correcto! Nunca des información personal a desconocidos en internet. Siempre cuéntale a un adulto de confianza.",bad:"Dar datos personales a desconocidos es peligroso. Nunca compartas dirección, teléfono o fotos con alguien que no conoces en persona."},
+  {icon:"🔑",q:"Tu amigo te pide la contraseña de tu cuenta de juego para jugar desde su casa. ¿Qué haces?",opts:["Le doy mi contraseña porque es mi amigo","No le doy mi contraseña a nadie","Le digo una parte de la clave","Le creo una cuenta nueva sin decirle la mía"],c:1,ok:"¡Muy bien! La contraseña es secreta — solo la debes saber tú (y tus padres). Ni a tus mejores amigos.",bad:"Las contraseñas son secretas. Aunque sea tu amigo, dársela puede costarte tu cuenta."},
+  {icon:"🖥️",q:"Estás navegando y aparece: '¡GANASTE un celular! Haz clic aquí ahora.' ¿Qué haces?",opts:["Hago clic rápido para no perder el premio","Cierro la ventana y se la muestro a un adulto","Le envío el enlace a todos mis amigos","Ingreso mi nombre para reclamar el premio"],c:1,ok:"¡Excelente! Esos avisos se llaman fraudes o engaños. Nunca son reales. Cierra y cuéntaselo a un adulto.",bad:"Ese tipo de avisos son trampas. Nunca hagas clic. Cierra la ventana y muéstrasela a un adulto de confianza."},
+  {icon:"📷",q:"Tu compañero comparte una foto tuya que te hace ver mal en el grupo del salón. ¿Qué haces?",opts:["Le mando una foto fea de él también","Me río y la comparto con más personas","Le cuento a un maestro o a mis padres","No hago nada, espero que la borre solo"],c:2,ok:"¡Bien hecho! Compartir fotos hirientes sin permiso es ciberacoso. Siempre cuéntale a un adulto de confianza.",bad:"Vengarse no soluciona nada. Lo correcto es contarle a un maestro o a tus padres. Eso tiene solución."},
+  {icon:"🔒",q:"¿Cuál de estas contraseñas es la más segura para proteger tu cuenta?",opts:["123456","miperro","Sol#2024!luna","pedro"],c:2,ok:"¡Correcto! Una buena contraseña mezcla letras, números y símbolos. Que sea larga y sin datos personales.",bad:"Una contraseña segura debe tener letras, números y símbolos. Evita usar tu nombre o fechas de cumpleaños."},
+  {icon:"🌐",q:"Quieres buscar información para una tarea. ¿Qué sitios son más seguros para consultar?",opts:["Cualquier página que aparezca primero","Páginas recomendadas por tu maestro o padres","Páginas con muchos colores y anuncios","Páginas que te piden crear una cuenta gratis"],c:1,ok:"¡Muy bien! Consulta siempre páginas recomendadas por adultos de confianza. Son más seguras y confiables.",bad:"No todas las páginas tienen información correcta o segura. Usa sitios recomendados por tus maestros o padres."},
+  {icon:"👀",q:"Estás en casa solo usando internet. ¿Qué es lo más importante que debes recordar?",opts:["Puedo visitar cualquier página sin que nadie lo sepa","Debo usar internet en espacios comunes y con permiso de un adulto","Puedo dar mi información si el sitio se ve bonito","Puedo chatear con cualquier persona porque internet es seguro"],c:1,ok:"¡Perfecto! Usar internet en espacios comunes y con supervisión de adultos te mantiene más seguro.",bad:"Siempre usa internet en zonas comunes de la casa y con permiso o supervisión de un adulto."},
+  {icon:"🆘",q:"Alguien en internet te hace sentir incómodo o con miedo. ¿Qué debes hacer de inmediato?",opts:["Seguir hablando para entender qué quiere","No decirle a nadie para no meterme en problemas","Cerrar la conversación y contarle a un adulto","Responder de forma grosera para que me deje en paz"],c:2,ok:"¡Correcto! Si algo en internet te hace sentir mal, sal de ahí y cuéntale a un adulto. Nunca es tu culpa.",bad:"Si algo o alguien te incomoda en internet, cierra y cuéntaselo SIEMPRE a un adulto. Nunca es tu culpa."},
+];
+
+let cur=0,score=0,lives=3,ans=false;
+
+function updLives(){document.getElementById('lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives)}
+
+function loadQ(){
+  if(cur>=Qs.length){showEnd();return}
+  const q=Qs[cur];ans=false;
+  document.getElementById('icon').textContent=q.icon;
+  document.getElementById('qtxt').textContent=q.q;
+  document.getElementById('qnum').textContent=(cur+1)+' / '+Qs.length;
+  document.getElementById('prog').style.width=(cur/Qs.length*100)+'%';
+  document.getElementById('fb').className='fb';
+  document.getElementById('nxt').className='nxt';
+  const og=document.getElementById('opts');
+  og.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';b.textContent=o;
+    b.onclick=()=>pick(i);og.appendChild(b);
+  });
+  updLives();drawBg();
+}
+
+function pick(idx){
+  if(ans)return;ans=true;
+  const q=Qs[cur];
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach(b=>b.classList.add('dim'));
+  if(idx===q.c){
+    btns[idx].classList.remove('dim');btns[idx].classList.add('correct');
+    score+=10;document.getElementById('score').textContent=score;
+    document.getElementById('fb').className='fb ok show';
+    document.getElementById('fb-title').textContent='✔ ¡Muy bien!';
+    document.getElementById('fb-body').textContent=q.ok;
+  } else {
+    btns[idx].classList.remove('dim');btns[idx].classList.add('wrong');
+    btns[q.c].classList.remove('dim');btns[q.c].classList.add('correct');
+    lives--;updLives();
+    document.getElementById('fb').className='fb bad show';
+    document.getElementById('fb-title').textContent='✖ No era esa...';
+    document.getElementById('fb-body').textContent=q.bad;
+  }
+  if(lives<=0){setTimeout(showEnd,1800);return}
+  document.getElementById('nxt').className='nxt show';
+}
+
+document.getElementById('nxt').onclick=()=>{cur++;loadQ()};
+
+function showEnd(){
+  document.getElementById('game-area').style.display='none';
+  document.getElementById('end').className='end show';
+  document.getElementById('prog').style.width='100%';
+  const p=score/(Qs.length*10);
+  let icon,msg,sub,medals;
+  if(p>=.9){icon='🏆';msg='¡Eres un Guardián del Internet!';sub='Conoces muy bien cómo protegerte en internet.\n¡Sigue así y enséñales a tus amigos!';medals='🥇🌟🛡️'}
+  else if(p>=.6){icon='😊';msg='¡Buen trabajo!';sub='Sabes muchas cosas sobre seguridad en internet.\nRepasa las preguntas que fallaste y mejorarás aún más.';medals='🥈⭐'}
+  else{icon='💪';msg='¡Sigue practicando!';sub='La seguridad en internet se aprende.\nVuelve a intentarlo y pide ayuda si tienes dudas.';medals='🌱📚'}
+  document.getElementById('e-icon').textContent=icon;
+  document.getElementById('e-msg').textContent=msg;
+  document.getElementById('e-sub').textContent=sub;
+  document.getElementById('e-medals').textContent=medals;
+  document.getElementById('e-score').textContent='Puntaje final: '+score+' / '+(Qs.length*10)+' puntos';
+  drawBg();
+}
+
+function restart(){
+  cur=0;score=0;lives=3;
+  document.getElementById('score').textContent='0';
+  document.getElementById('game-area').style.display='block';
+  document.getElementById('end').className='end';
+  loadQ();
+}
+
+function drawBg(){
+  const cv=document.getElementById('bgc');
+  const gw=document.getElementById('gw');
+  cv.width=gw.offsetWidth;cv.height=gw.offsetHeight;
+  const W=cv.width,H=cv.height;
+  const ctx=cv.getContext('2d');
+
+  ctx.fillStyle='#0a1628';ctx.fillRect(0,0,W,H);
+
+  const stars=[];
+  for(let i=0;i<55;i++) stars.push([Math.random(),Math.random(),Math.random()*1.5+0.3]);
+  stars.forEach(([rx,ry,r])=>{
+    ctx.beginPath();ctx.arc(rx*W,ry*H,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${180+Math.random()*75},${200+Math.random()*55},255,${0.35+Math.random()*0.55})`;
+    ctx.fill();
+  });
+
+  ctx.strokeStyle='rgba(55,138,221,0.07)';ctx.lineWidth=.5;
+  for(let gx=0;gx<W;gx+=48){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke()}
+  for(let gy=0;gy<H;gy+=48){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke()}
+
+  const circuits=[
+    {x:0,y:H*0.25,segs:[{dx:70,dy:0},{dx:0,dy:-35},{dx:45,dy:0},{dx:0,dy:22}]},
+    {x:W,y:H*0.55,segs:[{dx:-65,dy:0},{dx:0,dy:30},{dx:-40,dy:0},{dx:0,dy:-20}]},
+    {x:W*0.25,y:0,segs:[{dx:0,dy:55},{dx:22,dy:0},{dx:0,dy:32}]},
+    {x:W*0.75,y:H,segs:[{dx:0,dy:-50},{dx:-22,dy:0},{dx:0,dy:-28}]},
+  ];
+  circuits.forEach(c=>{
+    ctx.strokeStyle='rgba(55,138,221,0.2)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(c.x,c.y);
+    let cx=c.x,cy=c.y;
+    c.segs.forEach(s=>{cx+=s.dx;cy+=s.dy;ctx.lineTo(cx,cy)});
+    ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(93,202,165,0.5)';ctx.beginPath();ctx.arc(cx,cy,3.5,0,Math.PI*2);ctx.fill();
+  });
+
+  [[W*0.07,H*0.1,30],[W*0.93,H*0.18,24],[W*0.04,H*0.78,34],[W*0.96,H*0.82,20]].forEach(([hx,hy,r])=>{
+    ctx.strokeStyle='rgba(93,202,165,0.14)';ctx.lineWidth=1;ctx.setLineDash([]);
+    ctx.beginPath();
+    for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);i===0?ctx.moveTo(hx+r*Math.cos(a),hy+r*Math.sin(a)):ctx.lineTo(hx+r*Math.cos(a),hy+r*Math.sin(a))}
+    ctx.closePath();ctx.stroke();
+  });
+}
+
+window.addEventListener('load',()=>{loadQ()});
+window.addEventListener('resize',drawBg);
+</script>
+</body>
+</html>
