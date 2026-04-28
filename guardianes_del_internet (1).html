@@ -32,7 +32,7 @@ body{
   flex-direction:column;
 }
 canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.content{position:relative;z-index:2;padding:16px 20px 20px;overflow-y:auto;max-height:90vh}
+.content{position:relative;z-index:2;padding:16px 20px 20px;overflow-y:auto;max-height:90vh;word-wrap:break-word;overflow-wrap:break-word}
 
 .header{text-align:center;padding:8px 0 12px}
 .logo-ring{
@@ -66,11 +66,13 @@ canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:n
   background:rgba(12,25,50,0.9);
   border:1px solid rgba(55,138,221,0.35);
   border-radius:14px;padding:16px 14px 14px;
+  word-wrap:break-word;overflow-wrap:break-word;
 }
 .scene-icon{font-size:42px;text-align:center;margin-bottom:10px}
 .scene-q{
   font-size:14px;color:#B5D4F4;line-height:1.6;
-  text-align:center;min-height:48px;margin-bottom:14px;
+  text-align:center;min-height:auto;margin-bottom:14px;
+  word-wrap:break-word;overflow-wrap:break-word;
 }
 
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -90,17 +92,19 @@ canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:n
   justify-content:center;
   -webkit-user-select:none;
   user-select:none;
+  word-wrap:break-word;overflow-wrap:break-word;
 }
 .opt:active{background:rgba(55,138,221,0.25);border-color:rgba(55,138,221,0.7);transform:scale(0.97)}
 .opt.correct{background:rgba(29,158,117,0.3);border-color:#1D9E75;color:#9FE1CB}
 .opt.wrong{background:rgba(226,75,74,0.2);border-color:#E24B4A;color:#F7C1C1}
 .opt.dim{pointer-events:none;opacity:.35}
 
-.fb{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.5;display:none}
+.fb{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.5;display:none;word-wrap:break-word;overflow-wrap:break-word}
 .fb.show{display:block}
 .fb.ok{background:rgba(29,158,117,0.2);border:1px solid rgba(29,158,117,0.5);color:#9FE1CB}
 .fb.bad{background:rgba(226,75,74,0.15);border:1px solid rgba(226,75,74,0.4);color:#F7C1C1}
 .fb-title{font-weight:700;margin-bottom:3px;font-size:13px}
+.fb-body{word-wrap:break-word;overflow-wrap:break-word}
 
 .nxt{
   display:none;width:100%;margin-top:10px;
@@ -121,7 +125,7 @@ canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:n
 .end.show{display:block}
 .end-icon{font-size:54px;margin-bottom:10px}
 .end-msg{font-size:18px;font-weight:700;color:#E6F1FB;margin-bottom:8px}
-.end-sub{font-size:12px;color:#85B7EB;line-height:1.6;margin-bottom:12px;white-space:pre-line}
+.end-sub{font-size:12px;color:#85B7EB;line-height:1.6;margin-bottom:12px;white-space:pre-line;word-wrap:break-word;overflow-wrap:break-word}
 .medals{font-size:28px;margin-bottom:14px;letter-spacing:4px}
 .score-final{font-size:14px;color:#5DCAA5;margin-bottom:16px;font-weight:600}
 .rst{
@@ -149,7 +153,7 @@ canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:n
   .prog-wrap{margin-bottom:10px}
   .card{padding:12px 10px 10px}
   .scene-icon{font-size:36px;margin-bottom:8px}
-  .scene-q{font-size:13px;min-height:44px;margin-bottom:12px}
+  .scene-q{font-size:13px;margin-bottom:12px}
   .opts{gap:8px}
   .opt{padding:9px 8px;font-size:11px;min-height:48px}
   .round-hint{font-size:10px;margin-bottom:6px}
@@ -195,7 +199,7 @@ canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:n
         <div class="opts" id="opts"></div>
         <div class="fb" id="fb">
           <div class="fb-title" id="fb-title"></div>
-          <div id="fb-body"></div>
+          <div class="fb-body" id="fb-body"></div>
         </div>
         <button class="nxt" id="nxt">Siguiente pregunta →</button>
       </div>
@@ -216,14 +220,70 @@ canvas.bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:n
 
 <script>
 const Qs=[
-  {icon:"💬",q:"Alguien que no conoces te escribe en un juego en línea y te pide tu número de teléfono y la dirección de tu casa. ¿Qué haces?",opts:["Le doy mis datos porque parece simpático","No doy mis datos personales a desconocidos"],c:1,ok:"¡Correcto! Nunca debes compartir información personal con extraños en internet.",bad:"Recuerda: nunca compartas datos personales (teléfono, dirección, etc.) con personas que no conoces en línea."},
-  {icon:"🔑",q:"Tu amigo te pide la contraseña de tu cuenta de juego para jugar desde su casa. ¿Qué haces?",opts:["Le doy mi contraseña porque es mi amigo","No le doy mi contraseña a nadie"],c:1,ok:"¡Correcto! Tus contraseñas son secretas, incluso para amigos. Puedes dejar que use tu dispositivo, pero nunca compartas la contraseña.",bad:"Las contraseñas deben mantenerse en secreto. Incluso amigos de confianza podrían cambiarla o usarla mal."},
-  {icon:"🖥️",q:"Estás navegando y aparece: '¡GANASTE un celular! Haz clic aquí ahora.' ¿Qué haces?",opts:["Hago clic rápido para no perder el premio","Cierro la ventana y se la muestro a un adulto"],c:1,ok:"¡Correcto! Esos mensajes son estafas. Nunca hagas clic en ventanas sospechosas, dile a un adulto.",bad:"¡Cuidado! Esos mensajes emergentes son estafas. No hagas clic; avísale a un adulto de inmediato."},
-  {icon:"📷",q:"Tu compañero comparte una foto tuya que te hace ver mal en el grupo del salón. ¿Qué haces?",opts:["Le mando una foto fea de él también","Habla con él, pídele que la borre y dile a un adulto si continúa"],c:1,ok:"¡Correcto! Comunica el problema y busca ayuda de adultos si es necesario.",bad:"Responder con lo mismo empeora las cosas. Siempre pide ayuda a un adulto en estas situaciones."},
-  {icon:"🔒",q:"¿Cuál de estas contraseñas es la más segura para proteger tu cuenta?",opts:["123456","miperro","Sol#2024!luna","pedro"],c:2,ok:"¡Correcto! Una buena contraseña mezcla letras, números y símbolos especiales.",bad:"Las contraseñas fuertes mezclan mayúsculas, minúsculas, números y símbolos. Evita palabras y números secuenciales."},
-  {icon:"🌐",q:"Quieres buscar información para una tarea. ¿Qué sitios son más seguros para consultar?",opts:["Cualquier página que aparezca primero","Páginas recomendadas por tu maestro o papás"],c:1,ok:"¡Correcto! Los adultos pueden recomendarte sitios seguros y confiables.",bad:"No todos los sitios son seguros o confiables. Siempre pide recomendaciones a maestros y papás."},
-  {icon:"👀",q:"Estás en casa solo usando internet. ¿Qué es lo más importante que debes recordar?",opts:["Puedo visitar cualquier página sin que nadie lo sepa","Debo usar internet en espacios compartidos y avisar a mis papás dónde estoy"],c:1,ok:"¡Correcto! Avísale a los adultos qué haces en internet y dónde estás.",bad:"Siempre debes decirle a tus papás cuándo usas internet y dónde estás. Ellos te protegen."},
-  {icon:"🆘",q:"Alguien en internet te hace sentir incómodo o con miedo. ¿Qué debes hacer de inmediato?",opts:["Seguir hablando para entender qué quiere","Cerrar la aplicación y contar a un adulto de inmediato"],c:1,ok:"¡Correcto! Confía en tus instintos: si algo te asusta, ¡habla con un adulto!",bad:"Nunca sigas hablando con personas que te incomodan. ¡Avísale a un adulto de inmediato!"}
+  {
+    icon:"💬",
+    q:"Alguien que no conoces te escribe en un juego en línea y te pide tu número de teléfono y la dirección de tu casa. ¿Qué haces?",
+    opts:["Le doy mis datos porque parece simpático","No doy mis datos personales a desconocidos"],
+    c:1,
+    ok:"¡Correcto! Nunca debes compartir información personal con extraños en internet.",
+    bad:"Recuerda: nunca compartas datos personales (teléfono, dirección, etc.) con personas que no conoces en línea."
+  },
+  {
+    icon:"🔑",
+    q:"Tu amigo te pide la contraseña de tu cuenta de juego para jugar desde su casa. ¿Qué haces?",
+    opts:["Le doy mi contraseña porque es mi amigo","No le doy mi contraseña a nadie"],
+    c:1,
+    ok:"¡Correcto! Tus contraseñas son secretas, incluso para amigos. Puedes dejar que use tu dispositivo.",
+    bad:"Las contraseñas deben mantenerse en secreto. Incluso amigos de confianza podrían cambiarla o usarla mal."
+  },
+  {
+    icon:"🖥️",
+    q:"Estás navegando y aparece: '¡GANASTE un celular! Haz clic aquí ahora.' ¿Qué haces?",
+    opts:["Hago clic rápido para no perder el premio","Cierro la ventana y se la muestro a un adulto"],
+    c:1,
+    ok:"¡Correcto! Esos mensajes son estafas. Nunca hagas clic en ventanas sospechosas.",
+    bad:"¡Cuidado! Esos mensajes emergentes son estafas. No hagas clic; avísale a un adulto de inmediato."
+  },
+  {
+    icon:"📷",
+    q:"Tu compañero comparte una foto tuya que te hace ver mal en el grupo del salón. ¿Qué haces?",
+    opts:["Le mando una foto fea de él también","Habla con él, pídele que la borre y dile a un adulto"],
+    c:1,
+    ok:"¡Correcto! Comunica el problema y busca ayuda de adultos si es necesario.",
+    bad:"Responder con lo mismo empeora las cosas. Siempre pide ayuda a un adulto en estas situaciones."
+  },
+  {
+    icon:"🔒",
+    q:"¿Cuál de estas contraseñas es la más segura para proteger tu cuenta?",
+    opts:["123456","miperro","Sol#2024!luna","pedro"],
+    c:2,
+    ok:"¡Correcto! Una buena contraseña mezcla letras, números y símbolos especiales.",
+    bad:"Las contraseñas fuertes mezclan mayúsculas, minúsculas, números y símbolos. Evita palabras simples."
+  },
+  {
+    icon:"🌐",
+    q:"Quieres buscar información para una tarea. ¿Qué sitios son más seguros para consultar?",
+    opts:["Cualquier página que aparezca primero","Páginas recomendadas por tu maestro o papás"],
+    c:1,
+    ok:"¡Correcto! Los adultos pueden recomendarte sitios seguros y confiables.",
+    bad:"No todos los sitios son seguros o confiables. Siempre pide recomendaciones a maestros y papás."
+  },
+  {
+    icon:"👀",
+    q:"Estás en casa solo usando internet. ¿Qué es lo más importante que debes recordar?",
+    opts:["Puedo visitar cualquier página sin que nadie lo sepa","Debo usar internet en espacios compartidos y avisar"],
+    c:1,
+    ok:"¡Correcto! Avísale a los adultos qué haces en internet y dónde estás.",
+    bad:"Siempre debes decirle a tus papás cuándo usas internet y dónde estás. Ellos te protegen."
+  },
+  {
+    icon:"🆘",
+    q:"Alguien en internet te hace sentir incómodo o con miedo. ¿Qué debes hacer de inmediato?",
+    opts:["Seguir hablando para entender qué quiere","Cerrar la aplicación y contar a un adulto de inmediato"],
+    c:1,
+    ok:"¡Correcto! Confía en tus instintos: si algo te asusta, ¡habla con un adulto!",
+    bad:"Nunca sigas hablando con personas que te incomodan. ¡Avísale a un adulto de inmediato!"
+  }
 ];
 
 let cur=0,score=0,lives=3,ans=false;
